@@ -94,6 +94,6 @@ class TestRunner:
     # 关闭log
     self.__logger.close()
     # 如果配置文件中delete_after_run设置为true，则测试完成后删除生成的代码
-    if readconfig('code_generate', 'delete_after_run').lower() == 'false':
+    if not readconfig('code_generate', 'delete_after_run').lower() == 'false':
       os.remove(self.__filepath)
     return result

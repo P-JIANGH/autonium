@@ -9,9 +9,11 @@ Oracle数据库连接器
 __author__ = 'JIANGH'
 
 import jpype, os
+from jpype import JavaException
 from . import _logger
+from ..config_reader import readconfig
 # 执行jar位置路径
-jar_path = os.path.join(os.path.abspath('.'), 'database_driver', 'oracle_connector.jar')
+jar_path = readconfig('database', 'jarpath')
 
 class OracleConn(object):
   """
@@ -81,7 +83,7 @@ class OracleConn(object):
       _data_list.add(_data_list_item)
       _data_list_item = jpype.java.util.ArrayList()
 
-    return self.connector.insert(table_name, columns_list_, _data_list)
+    _logger.info("Insert %d rows." % self.connector.insert(table_name, columns_list_, _data_list))
 
   def select_with_header(self, sql):
     '''选取数据并返回表头

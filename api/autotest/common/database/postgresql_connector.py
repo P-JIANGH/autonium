@@ -77,19 +77,15 @@ class PostgreConn(object):
     """向表中插入数据
     位置参数：表名，列名列表，数据表格（二维列表）
     """
-    with self.execute(sql.SQL("select {cols} from {table_name} limit 1").format(
-      cols=sql.SQL(', ').join(map(sql.Identifier, columns)),
-      table_name=sql.Identifier(table_name),
-    ).as_string(self.connector)) as cursor:
-      pass
     # 格式化sql模板
     format_sql = sql.SQL("insert into {table_name} ({cols}) values ({datas})").format(
       table_name=sql.Identifier(table_name),
       cols=sql.SQL(', ').join(map(sql.Identifier, columns)),
       datas=sql.SQL(', ').join(sql.Placeholder() * len(columns))
-    ).as_string(self.connector)
+    )
     try:
       # 执行多个sql并插入数据
+      print('Execute: %s' % format_sql.as_string(self.connector))
       cursor = self.connector.cursor()
       rowcount = cursor.executemany(format_sql, datalist)
       cursor.close()
@@ -102,7 +98,7 @@ class PostgreConn(object):
     else:
       # 无异常时提交
       self.connector.commit()
-      _logger.info('insert %d rows' % rowcount)
+      _logger.info('insert %d rows' % (rowcount if not rowcount == None else 0))
 
   def select(self, sql, *params):
     '''选取数据'''

@@ -40,7 +40,7 @@ public class OracleConnector {
 	 */
 	public void connect() {
 		try {
-			Class.forName("oracle.jdbc.OracleDriver");
+			Class.forName("oracle.jdbc.driver.OracleDriver");
 			this.conn = DriverManager.getConnection(this.url);
 			this.conn.setAutoCommit(false);
 			System.out.println("Oracle Driver: Connect Success");
@@ -64,7 +64,7 @@ public class OracleConnector {
 	 * @param dataList		数据二维列表
 	 * @return	返回插入结果。0 为失败， 1 为成功
 	 */
-	public int[] insert(String tableName, List<String> columnsList, List<List<Object>> dataList) {
+	public int insert(String tableName, List<String> columnsList, List<List<Object>> dataList) {
 		// 测试请求数据库
 		ResultSet testResult = null;
 		StringBuilder testSql = new StringBuilder();
@@ -101,7 +101,7 @@ public class OracleConnector {
 
 		// 迭代dataList，向模板中插入参数并打印请求内容，执行SQL
 		List<Object> paramList = new ArrayList<>();
-		int[] result = null;
+		int result = 0;
 		try {
 			for (List<Object> dataRow: dataList) {
 				this.preparedStatement = this.conn.prepareStatement(insertSqlTemplate.toString());
@@ -118,9 +118,9 @@ public class OracleConnector {
 				}
 				System.out.println("Execute: " + insertSqlTemplate.toString());
 				System.out.println(" Params: " + paramList.toString());
-				this.preparedStatement.addBatch();
+				paramList = new ArrayList<>();
+				result += this.preparedStatement.executeUpdate();
 			}
-			result = this.preparedStatement.executeBatch();
 			this.commit();
 		} catch (Exception e) {
 			// 发生异常时回滚并关闭数据库连接

@@ -4,8 +4,6 @@
 /test_result/*
 /test_result/*/
 /front/dist/*
-/api/autotest/testcodegen/dist/*
-!/api/autotest/testcodegen/dist/__init__.py
 
 # drivers
 /browser_driver/*
@@ -13,6 +11,8 @@
 # cache
 **/__pycache__/
 test_*.py
+!/api/autotest/testcodegen/output/__init__.py
+/api/autotest/testcodegen/output/*
 
 # Local DB
 db.sqlite3

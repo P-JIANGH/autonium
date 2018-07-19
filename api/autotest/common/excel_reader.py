@@ -38,6 +38,7 @@ class ExcelReader():
     self.__pid = self.excel_app.pid   # 备用属性，出现进程不干净的情况时使用
     self.excel_book = None
     self.excel_sheet = None
+    self.number_handler = lambda num: int(num) if num == int(num) else num
 
   # 使用上下文管理，强制使用with句，操作完自动close
   @contextlib.contextmanager
@@ -55,20 +56,20 @@ class ExcelReader():
 
   def write_value(self, value, start_range, end_range=None):
     """向单元格或单元格范围写入数据"""
-    self.excel_sheet.range(start_range).options(numbers=str).value = value
+    self.excel_sheet.range(start_range).options(numbers=self.number_handler).value = value
     return self
 
   def read_value(self, start_range, end_range=None):
     """读取单元格或单元格范围数据"""
-    return self.excel_sheet.range(start_range, end_range).options(numbers=str).value
+    return self.excel_sheet.range(start_range, end_range).options(numbers=self.number_handler).value
 
   def read_header(self, start_range):
     """指定起始点，拓展向右读取数据"""
-    return self.excel_sheet.range(start_range).options(numbers=str, expand='right').value
+    return self.excel_sheet.range(start_range).options(numbers=self.number_handler, expand='right').value
 
   def read_table(self, start_range):
     """指定起始点，拓展向右下读取表格数据"""
-    return self.excel_sheet.range(start_range).options(numbers=str, expand='table').value
+    return self.excel_sheet.range(start_range).options(numbers=self.number_handler, expand='table').value
 
   def insert_picture(self, picture_path, point, percent=None, width=None, height=None):
     """
