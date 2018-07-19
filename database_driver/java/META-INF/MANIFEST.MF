@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: ojdbc7.jar
+Main-Class: cn.com.transcosmos.OracleConnector

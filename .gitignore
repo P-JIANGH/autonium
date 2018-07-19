@@ -1,0 +1,28 @@
+# logs
+*.log
+/test_result/
+/test_result/*
+/test_result/*/
+/front/dist/*
+/api/autotest/testcodegen/dist/*
+!/api/autotest/testcodegen/dist/__init__.py
+
+# drivers
+/browser_driver/*
+
+# cache
+**/__pycache__/
+test_*.py
+
+# Local DB
+db.sqlite3
+
+# database driver
+/database_driver/*
+!/database_driver/java/
+
+# migrations
+/**/migrations/00*
+
+# IDE
+/.vscode/

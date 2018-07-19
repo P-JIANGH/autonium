@@ -1,0 +1,17 @@
+{
+  "name": "add_reports",
+  
+  "tests": {
+    "test_add_reports": [
+      {
+        "action": "insert_to_database_from_excel",
+        "sheet_index": "1",
+        "file_path": "E:\\test画面\\Angular画面.xlsx",
+        "header_range": "P19:S19",
+        "data_range": "P21:S23",
+        "table_name": "USERS"
+        }
+         
+    ]
+  }
+}

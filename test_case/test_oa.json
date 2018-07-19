@@ -1,0 +1,117 @@
+{
+  "name": "test_OA",
+  "baseUrl": "http://10.11.1.52:8008/oa/MN_LOGIN.aspx",
+  "start": [
+    {
+      "action": "input_value",
+      "target": "txtUid",
+      "mode": "id",
+      "value": "4755"
+    },
+    {
+      "action": "input_value",
+      "target": "txtPwd",
+      "mode": "id",
+      "value": "4755"
+    },
+    {
+      "action": "click",
+      "target": "ibtConfirm"
+    }
+  ],
+  "end": [
+    {
+      "action": "screen_shot",
+      "picture_name": "picture"
+    },
+    {
+      "action": "select_frame",
+      "target": "head"
+    },
+    {
+      "action": "click",
+      "target": "ibtLogoff"
+    }
+  ],
+  "tests": {
+    "test_add_report": [
+      {
+        "action": "select_frame",
+        "target": "tree"
+      },
+      {
+        "action": "click",
+        "target": "#mytree tr:nth-of-type(4) a font",
+        "mode": "css"
+      },
+      {
+        "action": "select_frame",
+        "target": "func_link"
+      },
+      {
+        "action": "input_value",
+        "target": "txtmemo",
+        "mode": "id",
+        "value": "测试用"
+      },
+      {
+        "action": "click",
+        "target": "ibtSave",
+        "mode": "id"
+      }
+    ],
+    "test_delete_today_report": [
+      {
+        "action": "select_frame",
+        "target": "tree"
+      },
+      {
+        "action": "click",
+        "target": "#mytree tr:nth-of-type(5) a font",
+        "mode": "css"
+      },
+      {
+        "action": "select_frame",
+        "target": "func_link"
+      },
+      {
+        "action": "click",
+        "target": "dtg1__ctl2_chk1",
+        "mode": "id"
+      },
+      {
+        "action": "click",
+        "target": "ibtDel",
+        "mode": "id"
+      }
+    ],
+    "test_search_by_date": [
+      {
+        "action": "select_frame",
+        "target": "func_link"
+      },
+      {
+        "action": "input_value",
+        "target": "txtdate_from",
+        "mode": "id",
+        "value": "2018/06/01"
+      },
+      {
+        "action": "input_value",
+        "target": "txtdate_to",
+        "mode": "id",
+        "value": "2018/06/30"
+      },
+      {
+        "action": "click",
+        "target": "ibtSearch",
+        "mode": "id"
+      },
+      {
+        "action": "click",
+        "target": "ibtClear",
+        "mode": "id"
+      }
+    ]
+  }
+}
