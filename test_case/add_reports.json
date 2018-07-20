@@ -4,13 +4,12 @@
   "tests": {
     "test_add_reports": [
       {
-        "action": "insert_to_database_from_excel",
-        "file_path": "C:\\Users\\jianghao.JNTCI\\Desktop\\test画面\\銘柄･セクター登録画面設計＆sql\\ＧＸ画面1-銘柄･セクター登録.xlsx",
-        "sheet_index": "2",
-        "header_range": "C69:J69",
-        "data_range": "C70:J74",
-        "table_name": "MAIN"
-        }
+        "action": "insert_to_excel_from_database",
+        "file_path": "E:\\insert_to_excel_from_database.xlsx",
+        "sheet_index": "0",
+        "start_range": "H10:",
+        "sql": "SELECT START_TIME, MEIGARA_CODE ,SHOUKSB_CODE ,DOLLAR_CODE, KUNI_CODE2, CLASS_ID ,UPDATE_USER ,UPDATE_TIME  FROM MAIN"
+      } 
     ]
   }
 }

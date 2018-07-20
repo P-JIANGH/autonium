@@ -190,10 +190,7 @@ class OracleConn(object):
       query_result = preStat.executeQuery()
       columnCounts = query_result.getMetaData().getColumnCount()
       while columnCounts > 0 and query_result.next():
-        result_list_item = []
-        for i in range(columnCounts):
-          result_list_item.append(query_result.getObject(jpype.JInt(i + 1)))
-        result_list.append(result_list_item)
+        result_list.append([query_result.getString(jpype.JInt(i + 1)) for i in range(columnCounts)])
     except JavaException as e:
       _logger.error("Oracle Driver: SQL Error in Query Select")
       log_java_exception(e)
