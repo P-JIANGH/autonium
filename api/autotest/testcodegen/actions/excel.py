@@ -97,11 +97,9 @@ def insert_screenshot_to_excel(**params):
 
   You need open a excel book and open a sheet at first
   """
-  from ...common.config_reader import readconfig
-  picture_path = readconfig('result', 'picture_folder')
-  if params.get('percent'):
-    return """\
-      with er.open_excel(r"{file_path}") as reader:
-        reader.open_sheet({sheet_index})
-        reader.insert_picture(r\"{path}{picture_name}.png\", '{point}', percent='{percent}', width={width}, height={height})
-    """.format(**params, path=picture_path)
+  return """\
+    picture_path = os.path.join(os.path.abspath(readconfig('result', 'picture_folder')), '{picture_name}.png')
+    with er.open_excel(r"{file_path}") as reader:
+      reader.open_sheet({sheet_index})
+      reader.insert_picture(picture_path, '{point}', percent='{percent}', width={width}, height={height})
+  """.format(**params)

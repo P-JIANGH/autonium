@@ -10,7 +10,7 @@ from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoSuchFrameException
-import unittest, time, re
+import unittest, time, re, os
 
 from .. import TestBase
 from .. import BrowserTestBase

@@ -192,7 +192,7 @@ class OracleConn(object):
       while columnCounts > 0 and query_result.next():
         result_list_item = []
         for i in range(columnCounts):
-          result_list_item.append(query_result.getObject(jpype.JInt(i + 1))._pyv)
+          result_list_item.append(query_result.getObject(jpype.JInt(i + 1)))
         result_list.append(result_list_item)
     except JavaException as e:
       _logger.error("Oracle Driver: SQL Error in Query Select")
