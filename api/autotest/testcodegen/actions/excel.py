@@ -70,12 +70,12 @@ def select_table_value_from_excel(**params):
 })
 def insert_to_excel_from_database(**params):
   import re
-  pos_dict = re.compile(r'(?P<col>[a-zA-Z]+)(?P<row>[0-9]+)').match({params.get('start_range')}).groupdict()
+  pos_dict = re.compile(r'(?P<col>[a-zA-Z]+)(?P<row>[0-9]+)').match(params.get('start_range')).groupdict()
   col_index = pos_dict['col']
   row_index = pos_dict['row']
   return """\
-    data = db_conn.select({sql})
-    with er.open_excel({file_path}) as reader:
+    data = db_conn.select("{sql}")
+    with er.open_excel(r"{file_path}") as reader:
       reader.open_sheet({sheet_index})
       for i, d in enumerate(data):
         row_index = str({row} + i)
@@ -84,6 +84,8 @@ def insert_to_excel_from_database(**params):
 
 @Args({
   "picture_name": "text",
+  "file_path": "text",
+  "sheet_index": "number",
   "point": "text",
   "width": "number",
   "height": "number",
@@ -98,10 +100,8 @@ def insert_screenshot_to_excel(**params):
   from ...common.config_reader import readconfig
   picture_path = readconfig('result', 'picture_folder')
   if params.get('percent'):
-    return [
-      "  reader.insert_picture({path}{picture_name}.png, {point}, width={width}, height={height})".format(**params, path=picture_path)
-    ]
-  else:
-    return [
-      "  reader.insert_picture({path}{picture_name}.png, {point}, percent='{percent}')".format(**params, path=picture_path)
-    ]
+    return """\
+      with er.open_excel(r"{file_path}") as reader:
+        reader.open_sheet({sheet_index})
+        reader.insert_picture(r\"{path}{picture_name}.png\", '{point}', percent='{percent}', width={width}, height={height})
+    """.format(**params, path=picture_path)

@@ -5,13 +5,12 @@
     "test_add_reports": [
       {
         "action": "insert_to_database_from_excel",
-        "sheet_index": "0",
-        "file_path": "E:\\Angular画面.xlsx",
-        "header_range": "Q11:T11",
-        "data_range": "Q13:T15",
-        "table_name": "USERS"
+        "file_path": "C:\\Users\\jianghao.JNTCI\\Desktop\\test画面\\銘柄･セクター登録画面設計＆sql\\ＧＸ画面1-銘柄･セクター登録.xlsx",
+        "sheet_index": "2",
+        "header_range": "C69:J69",
+        "data_range": "C70:J74",
+        "table_name": "MAIN"
         }
-         
     ]
   }
 }

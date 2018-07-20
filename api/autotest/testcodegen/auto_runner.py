@@ -54,7 +54,10 @@ class TestRunner:
         codes = codes + '%s\n' % actions_codes
       else:
       # 当action为一个字符串时，添加分隔符
-        codes = codes + '\t\t%s\n' % actions_codes
+        if not len(actions_codes.splitlines()) > 1:
+          codes = codes + ('\t\t%s\n' % actions_codes)
+        else:
+          codes = codes + ('%s\n' % actions_codes)
     return codes.expandtabs(2)  # 将制表符展开为两个空格
 
   def parser(self, data):

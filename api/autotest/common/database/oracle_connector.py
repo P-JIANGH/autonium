@@ -11,9 +11,8 @@ __author__ = 'JIANGH'
 import jpype, os
 from jpype import java, JavaException, JClass, JPackage
 from . import _logger
-from ..config_reader import readconfig
 # 执行jar位置路径
-jar_path = readconfig('database', 'jarpath')
+jar_path = './database_driver/ojdbc7.jar'
 
 def log_java_exception(exception):
   _logger.error('\n'.join([line for line in exception.stacktrace().splitlines() if not line == '']))
@@ -109,16 +108,16 @@ class OracleConn(object):
         for i, data in enumerate(row):
           if data == None:
             preStat.setNull(jpype.JInt(i + 1), columnsTypeList[i])
-            paramList.append(None)
+            paramList.append('None')
           else:
-            param_class = self.__switchType(columnsTypeList[i])
-            param = self.__prepareParam(param_class, data)
-            if param_class.getSimpleName() == "Integer":
+            param_pyclass = self.__switchType(columnsTypeList[i])
+            param = self.__prepareParam(param_pyclass, data)
+            if param_pyclass.class_.getSimpleName() == "Integer":
               methodName = 'setInt'
             else:
-              methodName = 'set' + param_class.getSimpleName()
+              methodName = 'set' + param_pyclass.class_.getSimpleName()
             getattr(preStat, methodName)(jpype.JInt(i + 1), param)
-            paramList.append(str(param._pyv))
+            paramList.append(str(param._pyv if hasattr(param, '_pyv') else param))
         _logger.info("\nExecute: " + insert_sql_template + "\nParams: " + ', '.join(paramList))
         result = result + preStat.executeUpdate()
     except JavaException as e:
@@ -139,39 +138,39 @@ class OracleConn(object):
       code == Types.NVARCHAR or
       code == Types.LONGNVARCHAR or
       code == Types.LONGVARCHAR):
-      return java.lang.Class.forName('java.lang.String')
+      return java.lang.String
     elif code == Types.INTEGER:
-      return java.lang.Class.forName('java.lang.Integer')
+      return java.lang.Integer
     elif code == Types.BIGINT:
-      return java.lang.Class.forName('java.lang.Long')
+      return java.lang.Long
     elif code == Types.BOOLEAN:
-      return java.lang.Class.forName('java.lang.Boolean')
+      return java.lang.Boolean
     elif code == Types.NUMERIC or code == Types.DECIMAL:
-      return java.lang.Class.forName('java.math.BigDecimal')
+      return java.math.BigDecimal
     elif code == Types.DOUBLE:
-      return java.lang.Class.forName('java.lang.Double')
+      return java.lang.Double
     elif code == Types.FLOAT:
-      return java.lang.Class.forName('java.lang.Float')
+      return java.lang.Float
     elif code == Types.DATE:
-      return java.lang.Class.forName('java.sql.Date')
+      return java.sql.Date
     elif code == Types.TIME or code == Types.TIME_WITH_TIMEZONE:
-      return java.lang.Class.forName('java.sql.Time')
+      return java.sql.Time
     elif code == Types.TIMESTAMP or code == Types.TIMESTAMP_WITH_TIMEZONE:
-      return java.lang.Class.forName('java.sql.Timestamp')
+      return java.sql.Timestamp
     else:
-      return java.lang.Class.forName('java.lang.String')
+      return java.lang.String
 
-  def __prepareParam(self, param_class, data):
+  def __prepareParam(self, param_pyclass, data):
     if data == None: return None
     try:
-      if param_class.getSimpleName() == 'BigDecimal':
-        return java.math.BigDecimal(jpype.JString(str(data)))
-      elif param_class.getSimpleName() == 'String':
+      if param_pyclass.class_.getSimpleName() == 'BigDecimal':
+        return param_pyclass(jpype.JString(str(data)))
+      elif param_pyclass.class_.getSimpleName() == 'String':
         return jpype.JString(str(data))
-      elif param_class.getSimpleName() == 'Integer':
-        return java.lang.Integer(jpype.JString(str(data))).intValue()
+      elif param_pyclass.class_.getSimpleName() == 'Integer':
+        return param_pyclass(jpype.JString(str(data))).intValue()
       else:
-        return param_class.getMethod('valueOf', java.lang.Class.forName('java.lang.String')).invoke(None, jpype.JString(str(data)))
+        return param_pyclass.valueOf(jpype.JString(str(data)))
     except JavaException as e:
       _logger.error("Oracle Driver: SQL Error in prepare Params")
       log_java_exception(e)
