@@ -12,3 +12,11 @@ if not os.path.exists(log_folder_path):
   os.mkdir(log_folder_path)
 if not os.path.exists(picture_folder_path):
   os.mkdir(picture_folder_path)
+
+def check_json(json=dict()):
+  '''
+  运行前Check
+
+  TODO 目前未实现
+  '''
+  return True
