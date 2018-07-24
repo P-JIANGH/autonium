@@ -4,6 +4,7 @@ REM Common Useful package
 pip install numpy
 REM Test framework
 pip install selenium
+pip install hypothesis
 REM Web framework
 pip install django
 pip install django-cors-headers
