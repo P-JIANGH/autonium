@@ -1,6 +1,7 @@
 /**
  * 拓展JavaScript脚本
  * 从画面上读取整个表数据
+ * 要求支持ES6的浏览器
  * @argument  selector  画面选择器
  * @returns   表数据
  */

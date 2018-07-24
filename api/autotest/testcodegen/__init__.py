@@ -41,6 +41,7 @@ class BrowserTestBase(TestBase):
     """
     log_path = readconfig("result", "log_folder")
 
+    # 根据浏览器类型，选择浏览器驱动
     if cls.driver_kind == 'ie':
       cls.driver = webdriver.Ie(executable_path=DRIVER_PATH)
     elif cls.driver_kind == 'firefox':
