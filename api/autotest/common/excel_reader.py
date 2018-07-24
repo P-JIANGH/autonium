@@ -83,7 +83,7 @@ class ExcelReader():
     """
     rng = self.excel_sheet.range(point)
     image_width, image_height = Image.open(picture_path).size
-    if percent: # 指定百分比的情况
+    if percent: # 指定百分比的情况，百分比优先
       per = int(percent.replace('%', '')) / 100
       w, h = image_width * per, image_height * per
     else:       # 指定宽高的情况
@@ -93,10 +93,13 @@ class ExcelReader():
     return self
 
   def close(self):
+    # 保存并关闭excel文件
     self.excel_book.save()
     self.excel_book.close()
+    # 退出excel，关闭进程
     self.excel_app.quit()
 
   def __del__(self):
+    # 如果退出不成功则再退出一次
     if xw.apps.count > 0:
       self.excel_app.quit()

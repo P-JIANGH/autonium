@@ -12,7 +12,7 @@ __author__ = 'JIANGH'
 
 __all__ = ['TestRunner']
 
-import unittest, time, types, functools, os
+import unittest, time, types, functools, os, datetime
 
 from . import TestBase, log_result, log_codes_creator, actions
 from ..common.config_reader import readconfig
@@ -33,8 +33,13 @@ class TestRunner:
     self.parser(data)
 
   def create_func(self, func_name, func_settings=None):
-    '''格式化action代码'''
+    '''
+    格式化action代码
+
+    动态调用action获得返回值，根据条件为返回值字符串添加换行符或制表符
+    '''
     from .output import (func_template, nop)
+    # 获得函数头
     codes = func_template % func_name
     # 若有方法名而无方法体则方法体为pass
     if func_settings == None or func_settings == {}:
@@ -45,8 +50,8 @@ class TestRunner:
       # 当数组中存在一个多行字符串时，不进行格式化
       if isinstance(actions_codes, list):
         actions_codes = functools.reduce(
-          lambda x, y: x + y,
-          map(
+          lambda x, y: x + y,   # reduce把数组降级，将数组的每一个元素拼接在一起
+          map(                  # map则将固定操作映射给数组中的每一个元素
             lambda code: '\t\t%s\n' % code if not len(code.splitlines()) > 1 else '%s\n' % code,
             actions_codes
           )
@@ -82,7 +87,9 @@ class TestRunner:
         codefile.write(self.create_func(case, data.get('tests').get(case)))
 
   def run(self):
-    """Run!"""
+    """
+    运行测试
+    """
     # 获取生成代码的全局包路径
     package = os.path.splitext(os.path.abspath(self.__filepath))[0].replace(os.getcwd(), '').replace('\\', '.')[1:]
     # 引入创建后的测试Case代码
@@ -97,6 +104,14 @@ class TestRunner:
     # 关闭log
     self.__logger.close()
     # 如果配置文件中delete_after_run设置为true，则测试完成后删除生成的代码
-    if not readconfig('code_generate', 'delete_after_run').lower() == 'false':
+    if readconfig('code_generate', 'delete_after_run').lower() == 'true':
       os.remove(self.__filepath)
+    else:
+      # 获得文件修改时间
+      file_moddified_time = time.strftime('%Y%m%d', time.localtime(os.stat(self.__filepath).st_mtime))
+      # 获得文件修改时间与现在时间的时间差
+      timesub = datetime.datetime.now() - datetime.datetime.strptime(file_moddified_time, '%Y%m%d')
+      # 如果时间差的日数大于等于文件的保留天数则删除文件
+      if timesub.days >= int(readconfig('code_generate', 'hold_days')):
+        os.remove(self.__filepath)
     return result

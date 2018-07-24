@@ -11,7 +11,7 @@ __author__ = 'JIANGH'
 import jpype, os
 from jpype import java, JavaException, JClass, JPackage
 from . import _logger
-# 执行jar位置路径
+# 执行jar的位置路径
 jar_path = './database_driver/ojdbc7.jar'
 
 def log_java_exception(exception):
@@ -26,6 +26,10 @@ class OracleConn(object):
   | database: the database to connect to\n
   | user: the user to login\n
   | password: password of the user
+
+  使用oracle数据库会开启Java虚拟机
+
+  在向调用的java方法中传值时需要注意类型问题： python类型 <==> java类型
   """
   def __init__(self, **kwargs):
     # 拼接URL
@@ -89,6 +93,7 @@ class OracleConn(object):
     try:
       preStat = self.connector.prepareStatement(testSql)
       testResult = preStat.executeQuery()
+      # 列表生成式：获取列类型码的列表
       columnsTypeList = [testResult.getMetaData().getColumnType(jpype.JInt(i + 1)) for i in range(len(columns))]
     except JavaException as e:
       _logger.error('Oracle Driver: Error In Execute Test SQL')
@@ -102,23 +107,32 @@ class OracleConn(object):
     )
     result = 0
     try:
+      # 按行循环数据集合
       for row in datalist:
+        # 准备执行sql模版
         preStat = self.connector.prepareStatement(insert_sql_template)
         paramList = []
+        # 按列循环数据行
         for i, data in enumerate(row):
+          # 如果数据为空则设置一个null参数
           if data == None:
             preStat.setNull(jpype.JInt(i + 1), columnsTypeList[i])
             paramList.append('None')
+          # 否则判断列的值类型，动态调用set方法
           else:
-            param_pyclass = self.__switchType(columnsTypeList[i])
-            param = self.__prepareParam(param_pyclass, data)
+            param_pyclass = self.__switchType(columnsTypeList[i]) # 根据sql类型获取java类型
+            param = self.__prepareParam(param_pyclass, data)      # 根据java类型为数据转型
+            # 如果java类型为整型包装类，则调整方法名为setInt
             if param_pyclass.class_.getSimpleName() == "Integer":
               methodName = 'setInt'
+            # 否则动态设置方法名
             else:
               methodName = 'set' + param_pyclass.class_.getSimpleName()
+            # 根据方法名动态查找方法并调用
             getattr(preStat, methodName)(jpype.JInt(i + 1), param)
             paramList.append(str(param._pyv if hasattr(param, '_pyv') else param))
         _logger.info("\nExecute: " + insert_sql_template + "\nParams: " + ', '.join(paramList))
+        # 执行sql
         result = result + preStat.executeUpdate()
     except JavaException as e:
       _logger.error("Oracle Driver: SQL Error in execute insert")
@@ -131,7 +145,13 @@ class OracleConn(object):
       _logger.info("Oracle Driver: Insert %d rows into %s" % (result, table_name))
 
   def __switchType(self, code):
+    """
+    私有方法
+    
+    根据sql类型码转换成java类型
+    """
     Types = java.sql.Types
+    # 字符型
     if (code == Types.VARCHAR or
       code == Types.CHAR or
       code == Types.NCHAR or
@@ -139,36 +159,55 @@ class OracleConn(object):
       code == Types.LONGNVARCHAR or
       code == Types.LONGVARCHAR):
       return java.lang.String
+    # 整数型
     elif code == Types.INTEGER:
       return java.lang.Integer
+    # 长整型
     elif code == Types.BIGINT:
       return java.lang.Long
+    # 布尔型
     elif code == Types.BOOLEAN:
       return java.lang.Boolean
+    # 精确数值型
     elif code == Types.NUMERIC or code == Types.DECIMAL:
       return java.math.BigDecimal
+    # 双精度数值型
     elif code == Types.DOUBLE:
       return java.lang.Double
+    # 单精度浮点数值型
     elif code == Types.FLOAT:
       return java.lang.Float
+    # 日期型
     elif code == Types.DATE:
       return java.sql.Date
+    # 时间类型
     elif code == Types.TIME or code == Types.TIME_WITH_TIMEZONE:
       return java.sql.Time
+    # 时间戳型
     elif code == Types.TIMESTAMP or code == Types.TIMESTAMP_WITH_TIMEZONE:
       return java.sql.Timestamp
+    # 默认为字符型
     else:
       return java.lang.String
 
   def __prepareParam(self, param_pyclass, data):
+    """
+    私有方法
+    
+    根据java类型为数据执行转型方法
+    """
     if data == None: return None
     try:
+      # 如果为精确数值型则执行new
       if param_pyclass.class_.getSimpleName() == 'BigDecimal':
         return param_pyclass(jpype.JString(str(data)))
+      # 如果为字符串则转为jpype的通用字符型
       elif param_pyclass.class_.getSimpleName() == 'String':
         return jpype.JString(str(data))
+      # 如果为整数型则执行new并开箱
       elif param_pyclass.class_.getSimpleName() == 'Integer':
         return param_pyclass(jpype.JString(str(data))).intValue()
+      # 否则执行其类方法转换
       else:
         return param_pyclass.valueOf(jpype.JString(str(data)))
     except JavaException as e:
@@ -184,11 +223,14 @@ class OracleConn(object):
     pass
 
   def select(self, sql):
+    '''选取数据'''
     result_list = []
     try:
+      # 执行sql并获取列数
       preStat = self.connector.prepareStatement(sql)
       query_result = preStat.executeQuery()
       columnCounts = query_result.getMetaData().getColumnCount()
+      # 循环获取数据
       while columnCounts > 0 and query_result.next():
         result_list.append([query_result.getString(jpype.JInt(i + 1)) for i in range(columnCounts)])
     except JavaException as e:
