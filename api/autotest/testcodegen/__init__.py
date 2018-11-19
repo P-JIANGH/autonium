@@ -8,10 +8,18 @@ from selenium.common.exceptions import WebDriverException
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoSuchFrameException
-import unittest
+import unittest, platform, os
 
 from ..common.config_reader import readconfig
-DRIVER_PATH = readconfig('webdriver', 'driver')
+
+DRIVER_BASE_PATH = readconfig('webdriver', 'driver')
+machine2bits = {'AMD64':64, 'x86_64': 64, 'i386': 32, 'x86': 32}
+driver_executable_name = {
+  'Ie': 'IEDriverServer.exe',
+  'Firefox': 'geckodriver.exe',
+  'Chrome': 'chromedriver.exe'
+}
+
 save_screenshot_path = readconfig('result', 'picture_folder')
 time_format = '%Y%m%d%H%M%S'
 
@@ -30,6 +38,8 @@ class BrowserTestBase(TestBase):
 
   test_url = ''
 
+  driver = None
+
   @classmethod
   def setUpClass(cls):
     """
@@ -42,17 +52,23 @@ class BrowserTestBase(TestBase):
     log_path = readconfig("result", "log_folder")
 
     # 根据浏览器类型，选择浏览器驱动
-    if cls.driver_kind == 'ie':
-      cls.driver = webdriver.Ie(executable_path=DRIVER_PATH)
-    elif cls.driver_kind == 'firefox':
-      cls.driver = webdriver.Firefox(executable_path=DRIVER_PATH, log_path=log_path + 'geckodriver.log')
-    elif cls.driver_kind == 'chrome':
-      cls.driver = webdriver.Chrome(executable_path=DRIVER_PATH)
+    if machine2bits.get(platform.machine()) == 32:
+        sub_folder_name = 'x86_driver'
     else:
+        sub_folder_name = 'x64_driver'
+    try:
+      driver_ctor = getattr(webdriver, cls.driver_kind.capitalize())
+    except AttributeError:
       raise WebDriverException(msg="Unkwon Browser")
-    cls.driver.implicitly_wait(5)
-    cls.driver.maximize_window()
-    cls.driver.get(cls.test_url)
+    else:
+      cls.driver = driver_ctor(executable_path=os.path.join(
+        DRIVER_BASE_PATH,
+        sub_folder_name,
+        driver_executable_name.get(cls.driver_kind.capitalize())
+      ))
+      cls.driver.implicitly_wait(5)
+      cls.driver.maximize_window()
+      cls.driver.get(cls.test_url)
 
   @classmethod
   def tearDownClass(cls):

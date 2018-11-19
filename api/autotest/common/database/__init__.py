@@ -39,6 +39,8 @@ class DBAdapter(object):
     connent()方法失败时返回空
     """
     dbtype = self.type
+    if dbtype is None or dbtype == '':
+      return None
     try:
       # SQL Server
       if dbtype == DBType.MSSQL:
